@@ -18,7 +18,7 @@ This library is not (yet) in the PlatformIO registry. You can add it to your `pl
 
 ```ini
 lib_deps =
-    [https://github.com/YOUR_USERNAME/My_BQ40Z80_Lib.git](https://github.com/YOUR_USERNAME/My_BQ40Z80_Lib.git)
+    https://github.com/johanwloubser99-max/My_BQ40Z80_Lib.git
 ```
 
 ## Basic Example
