@@ -1,52 +1,65 @@
-#include <Wire.h>
-#include "BQ40Z80.h"
+#include <SoftwareSerial.h>
 
-// Use the default I2C address (0x0B)
-BQ40Z80 bms; 
+// --- Pin Definitions for SoftwareSerial ---
+// Connect this (Relay) Arduino's Pin 10 to the AVR64DD32's TX1 pin
+const int BMS_RX_PIN = 10; 
+// Connect this (Relay) Arduino's Pin 11 to the AVR64DD32's RX1 pin
+const int BMS_TX_PIN = 11; 
 
+// --- Constants ---
+const byte SERIAL_ENQUIRY = 0x05;         // ENQ byte to request data
+const unsigned long ENQUIRY_INTERVAL = 10000;  // Send enquiry every 5 seconds
+
+// --- Global Variables ---
+unsigned long lastEnquiryTime = 0;      // Timestamp for enquiry timer
+
+// Initialize the SoftwareSerial port
+SoftwareSerial bmsSerial(BMS_RX_PIN, BMS_TX_PIN);
+
+/**
+ * @brief Main setup function.
+ */
 void setup() {
-  Serial.begin(115200);
-  while (!Serial) { delay(10); }
-
-  Serial.println("BQ40Z80 SimpleRead Example");
-
-  // Wire.begin() is called inside bms.begin()
-  if (!bms.begin()) {
-    Serial.println("Failed to find BQ40Z80 chip. Check wiring.");
-    while (1) { delay(10); }
-  }
+  // Initialize the Serial Monitor (for you to see the output)
+  Serial.begin(57600);
+  while (!Serial) delay(10);
   
-  Serial.println("BQ40Z80 Found!");
-  
-  // Optional: Enable debug messages
-  // bms.setDebug(true);
+  // Initialize the SoftwareSerial port to talk to the BMS Monitor
+  // This baud rate MUST match the LISTENER_SERIAL rate on your AVR64DD32
+  bmsSerial.begin(57600);
+
+  Serial.println("\r\n--- BMS Serial Relay/Tester ---");
+  Serial.println("This sketch will send an ENQ (0x05) byte to the BMS monitor");
+  Serial.println("every 5 seconds and print any response received.");
+  Serial.println("-----------------------------------------------------");
 }
 
+/**
+ * @brief Main loop: Sends requests and relays responses.
+ */
 void loop() {
-  Serial.print("Voltage: ");
-  Serial.print(bms.getVoltage());
-  Serial.println(" V");
+  
+  // Task 1: Periodically send the enquiry byte
+  if (millis() - lastEnquiryTime >= ENQUIRY_INTERVAL) {
+    Serial.println("\r\nSending ENQ (0x05) to BMS Monitor...");
+    bmsSerial.write(SERIAL_ENQUIRY);
+    lastEnquiryTime = millis();
+  }
 
-  Serial.print("Current: ");
-  Serial.print(bms.getCurrent());
-  Serial.println(" A");
+  // Task 2: Listen for a response from the BMS Monitor and relay it
+  if (bmsSerial.available() > 0) {
+    // Read all available characters and print them to the Serial Monitor
+    while (bmsSerial.available() > 0) {
+      Serial.write(bmsSerial.read());
+    }
+  }
 
-  Serial.print("Temperature: ");
-  Serial.print(bms.getTemperature());
-  Serial.println(" C");
-
-  Serial.print("SOC: ");
-  Serial.print(bms.getSOC());
-  Serial.println(" %");
-
-  Serial.print("Cell 1: ");
-  Serial.print(bms.getCellVoltage(1));
-  Serial.println(" mV");
-
-  Serial.print("Cell 7: ");
-  Serial.print(bms.getCellVoltage(7));
-  Serial.println(" mV");
-
-  Serial.println("--------------------");
-  delay(2000);
+  // (Task 3: Optional pass-through from your monitor TO the BMS)
+  // If you type anything in the Serial Monitor, it will be sent to the BMS Monitor.
+  // Be careful, as your BMS_Monitor sketch only expects 0x05.
+  /*
+  if (Serial.available() > 0) {
+    bmsSerial.write(Serial.read());
+  }
+  */
 }

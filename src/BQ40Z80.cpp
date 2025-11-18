@@ -17,10 +17,10 @@ bool BQ40Z80::begin() {
 // --- STANDARD SBS COMMANDS ---
 
 float BQ40Z80::getVoltage() {
-  return readWord(BQ40Z80_CMD_VOLTAGE) / 1000.0;
+  return readWord(BQ40Z80_CMD_VOLTAGE);
 }
 float BQ40Z80::getCurrent() {
-  return (int16_t)readWord(BQ40Z80_CMD_CURRENT) / 1000.0;
+  return (int16_t)readWord(BQ40Z80_CMD_CURRENT);
 }
 float BQ40Z80::getAvgCurrent() {
     return (int16_t)readWord(BQ40Z80_CMD_AVG_CURRENT) / 1000.0;
@@ -31,6 +31,9 @@ float BQ40Z80::getTemperature() {
 }
 uint8_t BQ40Z80::getSOC() { 
   return readByte(BQ40Z80_CMD_SOC);
+}
+uint8_t BQ40Z80::getSOH() { 
+  return readByte(BQ40Z80_CMD_STATE_OF_HEALTH);
 }
 uint16_t BQ40Z80::getRemCapacity() {
     return readWord(BQ40Z80_CMD_REMAINING_CAPACITY);

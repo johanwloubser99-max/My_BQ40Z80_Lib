@@ -13,6 +13,7 @@
 #define BQ40Z80_CMD_CURRENT             0x0A
 #define BQ40Z80_CMD_AVG_CURRENT         0x0B
 #define BQ40Z80_CMD_SOC                 0x0D // RelativeStateOfCharge
+#define BQ40Z80_CMD_STATE_OF_HEALTH     0x4F // StateOfHealth (SOH)
 #define BQ40Z80_CMD_REMAINING_CAPACITY  0x0F
 #define BQ40Z80_CMD_FULL_CHARGE_CAP     0x10
 #define BQ40Z80_CMD_CYCLE_COUNT         0x17
@@ -274,6 +275,7 @@ class BQ40Z80 {
     float getAvgCurrent();
     float getTemperature();
     uint8_t getSOC(); 
+    uint8_t getSOH();
     uint16_t getRemCapacity();
     uint16_t getFullCapacity();
     uint16_t getCycleCount();
